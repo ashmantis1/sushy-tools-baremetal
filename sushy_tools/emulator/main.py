@@ -34,6 +34,7 @@ from sushy_tools.emulator.resources import indicators as inddriver
 from sushy_tools.emulator.resources import managers as mgrdriver
 from sushy_tools.emulator.resources import storage as stgdriver
 from sushy_tools.emulator.resources.systems import fakedriver
+from sushy_tools.emulator.resources.systems import tapodriver
 from sushy_tools.emulator.resources.systems import ironicdriver
 from sushy_tools.emulator.resources.systems import libvirtdriver
 from sushy_tools.emulator.resources.systems import novadriver
@@ -114,10 +115,13 @@ class Application(flask.Flask):
     @memoize.memoize()
     def systems(self):
         fake = self.config.get('SUSHY_EMULATOR_FAKE_DRIVER')
+        tapo = self.config.get('SUSHY_EMULATOR_TAPO_DRIVER')
         os_cloud = self.config.get('SUSHY_EMULATOR_OS_CLOUD')
         ironic_cloud = self.config.get('SUSHY_EMULATOR_IRONIC_CLOUD')
 
-        if fake:
+        if tapo:
+            result = tapodriver.TapoDriver.initialize(self.config, self.logger)()
+        elif fake:
             result = fakedriver.FakeDriver.initialize(
                 self.config, self.logger)()
 
@@ -956,6 +960,10 @@ def parse_args():
                                     'environment variable '
                                     'SUSHY_EMULATOR_LIBVIRT_URI. '
                                     'Default is qemu:///system')
+    backend_group.add_argument('--tapo', action='store_true',
+                               help='Use the tapo driver. Can also be set '
+                                    'via environment variable '
+                                    'SUSHY_EMULATOR_TAPO_DRIVER.')
     backend_group.add_argument('--fake', action='store_true',
                                help='Use the fake driver. Can also be set '
                                     'via environment variable '
@@ -988,6 +996,9 @@ def main():
 
     if args.fake:
         app.config['SUSHY_EMULATOR_FAKE_DRIVER'] = True
+    
+    if args.tapo:
+        app.config['SUSHY_EMULATOR_TAPO_DRIVER'] = True
 
     else:
         for envvar in ('SUSHY_EMULATOR_LIBVIRT_URL',  # backward compatibility
