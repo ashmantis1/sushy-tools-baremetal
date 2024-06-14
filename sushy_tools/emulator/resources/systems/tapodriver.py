@@ -13,6 +13,7 @@
 import copy
 import random
 import time
+import os
 import amt.client
 import amt.wsman
 from PyP100 import PyP100
@@ -59,8 +60,17 @@ class TapoDriver(AbstractSystemsDriver):
             identity = system['uuid']
             if system['uuid'] not in self._systems:
                 self._systems[system['uuid']] = copy.deepcopy(system)
+
+            result = "";
+            if self._get(identity)['amt']:
+                result = self._ping(self._get(identity)['amt_address'])
+            else:
+                result = self._ping(self._get(identity)['address'])
+
             sys = self._systems[identity]
             if not sys['last_updated']: 
+                if result > 0: 
+                    continue
                 client = self._get_client(identity)
                 check_time = int(time.time())
                 power_state = self._get_power_state(client, identity)
@@ -72,6 +82,8 @@ class TapoDriver(AbstractSystemsDriver):
             for uuid, system in self._systems.items()
         }
 
+    def _ping(self, address): 
+        return os.system("ping -c 1 -W 0.2 " + address + ">/dev/null")
     def _tapo_login(self, identity, attempts=5):
         addr = self._get(identity)['address']
         username = self._get(identity)['tapo_username']
