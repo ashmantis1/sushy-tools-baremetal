@@ -165,6 +165,9 @@ class TapoDriver(AbstractSystemsDriver):
             try: 
                 client.turnOff()
                 time.sleep(0.3)
+                state = self._get_tapo_power_state(client)
+                if state != 'Off':
+                    raise Exception("Failed to power off")
                 break
             except: 
                 time.sleep(0.1)
@@ -175,6 +178,9 @@ class TapoDriver(AbstractSystemsDriver):
         while attempts < count:
             try: 
                 client.turnOn()
+                state = self._get_tapo_power_state(client)
+                if state != 'On':
+                    raise Exception("Failed to power on")
                 break
             except: 
                 time.sleep(0.1)
