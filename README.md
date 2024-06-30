@@ -1,6 +1,4 @@
-=========================
-Redfish development tools
-=========================
+# Redfish development tools
 
 This is a set of simple simulation tools aiming at supporting the
 development and testing of the Redfish protocol implementations and,
