@@ -7,7 +7,7 @@ RUN mkdir /build
 ADD ./requirements.txt /build
 ADD setup.py /build
 add setup.cfg /build
-ADD README.rst /build
+ADD README.md /build
 ADD sushy_tools /build/sushy_tools
 
 RUN  python3 -m venv /opt/venv 
